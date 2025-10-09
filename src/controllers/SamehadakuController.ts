@@ -1,11 +1,12 @@
 import * as cheerio from "cheerio"
-
+import * as cloudscraper from 'cloudscraper'
 export class SameHadakuController {
   constructor(
 
   ) { }
 
   public async getLatestAnime() {
+    
     const $ = cheerio.load()
     const image =
   }
