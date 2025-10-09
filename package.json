@@ -5,6 +5,7 @@
   },
   "dependencies": {
     "cheerio": "^1.1.2",
+    "cloudscraper": "^4.6.0",
     "hono": "^4.8.5"
   },
   "devDependencies": {

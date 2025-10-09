@@ -1,10 +1,12 @@
+import * as cheerio from "cheerio"
+
 export class SameHadakuController {
   constructor(
 
   ) { }
 
   public async getLatestAnime() {
-    const $ = cherio
+    const $ = cheerio.load()
     const image =
   }
 
