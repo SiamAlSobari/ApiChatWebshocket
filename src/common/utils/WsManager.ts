@@ -4,7 +4,6 @@ export class WsManager {
   static addClient(ws: WebSocket) {
     this.clients.add(ws);
   }
-
   static removeClient(ws: WebSocket) {
     this.clients.delete(ws);
   }

@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { websocket } from "hono/bun";
 import { wsController } from "./api/controllers/WsController";
 
+
 const app = new Hono().basePath("/api");
 
 //kumpulan route
