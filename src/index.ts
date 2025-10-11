@@ -1,11 +1,10 @@
 import { Hono } from "hono";
 import { websocket } from "hono/bun";
-import { wsController } from "./api/controllers/ws.co";
+import { wsController } from "./api/controllers/WsController";
 
 const app = new Hono().basePath("/api");
 
-// route lain (misal samehadaku)
-
+//kumpulan route
 app.get("/ping", (c) => c.text("pong"));
 app.route("/ws", wsController);
 
