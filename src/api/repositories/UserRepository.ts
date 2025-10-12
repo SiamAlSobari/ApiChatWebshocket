@@ -1,6 +1,6 @@
 import { db } from "../../common/utils/db";
 
-class UserRepository {
+export class UserRepository {
   public async getUserByUserName(userName: string) {
     return db.user.findUnique({
       where: {
