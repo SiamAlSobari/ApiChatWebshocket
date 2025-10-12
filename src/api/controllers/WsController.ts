@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { upgradeWebSocket } from "hono/bun";
-import { wsHandler } from "../service/WsService";
+import { wsHandler } from "../services/WsService";
 
 export const wsController = new Hono();
 
@@ -14,5 +14,5 @@ wsController.get(
     onOpen: (evt, ctx) => wsHandler.onOpen(ctx.raw),
     onMessage: (evt, ctx) => wsHandler.onMessage(ctx.raw, evt),
     onClose: (evt, ctx) => wsHandler.onClose(ctx.raw),
-  })),
+  }))
 );
