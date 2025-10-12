@@ -19,12 +19,13 @@ export class AuthService {
             return 
         }
 
+        //payload untuk jwt
         const payload = {
             user_id: existingUser.id,
             user_name: existingUser.user_name,
             exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60),
         }
 
-        
+        const token = await jwt
     }
 }
