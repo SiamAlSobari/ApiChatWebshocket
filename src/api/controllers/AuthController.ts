@@ -3,8 +3,7 @@ import { AuthService } from "../services/AuthService";
 import { UserRepository } from "../repositories/UserRepository";
 import { zValidator } from "@hono/zod-validator";
 import { logInValidation } from "../validations/AuthValidation";
-import { HTTPException } from 'hono/http-exception'
-
+import { setCookie } from "hono/cookie";
 
 //instansi class
 const userRepo = new UserRepository();
@@ -16,5 +15,11 @@ export const authController = new Hono();
 authController.post("/login", zValidator("json", logInValidation), async (c) => {
   const payload = c.req.valid("json");
   const token = await authService.login(payload.user_name, payload.password);
+  setCookie(c, "token", token,{
+    maxAge: 7 * 24 * 60 * 60, // set 7 hari
+    sameSite: "lax",
+    path: "/",
+    httpOnly: true
+  });
   return c.json({ token });
 });
