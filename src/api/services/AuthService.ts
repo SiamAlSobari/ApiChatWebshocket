@@ -1,24 +1,25 @@
 import { UserRepository } from "../repositories/UserRepository";
 import * as bcrypt from "bcryptjs";
-import { sign, verify } from "hono/jwt";
+import { sign } from "hono/jwt";
 import { JWT_SECRET } from "../../common/constants/JwtSecret";
-import { HttpException } from "../../common/utils/HttpException";
+import { HTTPException } from 'hono/http-exception'
 
 export class AuthService {
     constructor(
         private readonly userRepo : UserRepository
-    ){}
+    ){} 
 
 
+    //fungsi login dan logic
     public async login(userName: string, password: string) {
         const existingUser = await this.userRepo.getUserByUserName(userName);
         if (!existingUser){ //cek user jika tidak ada
-            throw new HttpException(401, "user tidak ditemukan");
+            throw new HTTPException(401, {message: "user tidak ditemukan"});
         }
 
         const isValidPassword = await bcrypt.compare(password, existingUser.hash_password) 
         if (!isValidPassword){ //cek password antara input dan di db
-            throw new HttpException(401, "password salah atau password tidak valid");
+            throw new HTTPException(401, {message: "password salah"});
         }
 
         //payload untuk jwt

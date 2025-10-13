@@ -2,19 +2,20 @@ import { Hono } from "hono";
 import { websocket } from "hono/bun";
 import { wsController } from "./api/controllers/WsController";
 import { authController } from "./api/controllers/AuthController";
-import { HttpException } from "./common/utils/HttpException";
+import { HTTPException } from 'hono/http-exception'
+
 
 const app = new Hono().basePath("/api");
-// error handler
-app.onError((err,c)=>{
-  if (err instanceof HttpException){
-    return c.json({success: false, message: err.message}, {status: err.status as 400});
+
+// Tangani error di sini
+app.onError((err, c) => {
+  if (err instanceof HTTPException) {
+    console.error('Caught HTTPException:', err.message)
+    return err.getResponse()
   }
-  return c.json({success: false, message: err.message}, {status: 500});
-}) //handle error exception
 
-
-
+  return c.text('Internal Server Error', 500)
+})
 //kumpulan route
 app.get("/ping", (c) => c.text("pong"));
 app.route("/ws", wsController);

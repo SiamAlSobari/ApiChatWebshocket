@@ -1,7 +1,7 @@
 import { hash } from "bcryptjs";
 import { db } from "../src/common/utils/db";
 
-async function main(){
+async function main() {
     //seed data user dan profile pertama
     const user1 = await db.user.upsert({
         where: { user_name: "user1" },
@@ -9,12 +9,14 @@ async function main(){
         create: {
             user_name: "user1",
             hash_password: await hash("siam123", 10),
-            profile: { create: {
-                first_name: "user1",
-                last_name: "user1",
-            } },
+            profile: {
+                create: {
+                    first_name: "user1",
+                    last_name: "user1",
+                },
+            },
         },
-    })
+    });
 
     //seed data user dan profile kedua
     const user2 = await db.user.upsert({
@@ -23,18 +25,18 @@ async function main(){
         create: {
             user_name: "user2",
             hash_password: await hash("siam123", 10),
-            profile: { create: { 
-                first_name: "user2",
-                last_name: "user2",
-            } },
+            profile: {
+                create: {
+                    first_name: "user2",
+                    last_name: "user2",
+                },
+            },
         },
-    })
-
+    });
 
     console.log({ user1, user2 });
     console.log("seed data berhasil dijalankan");
 }
-
 
 main()
     .then(async () => {

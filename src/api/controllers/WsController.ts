@@ -11,8 +11,8 @@ wsController.get("/", (c) => c.text("pong"));
 wsController.get(
   "/connect",
   upgradeWebSocket(() => ({
-    onOpen: (evt, ctx) => wsHandler.onOpen(ctx.raw),
+    onOpen: (_evt, ctx) => wsHandler.onOpen(ctx.raw),
     onMessage: (evt, ctx) => wsHandler.onMessage(ctx.raw, evt),
-    onClose: (evt, ctx) => wsHandler.onClose(ctx.raw),
-  }))
+    onClose: (_evt, ctx) => wsHandler.onClose(ctx.raw),
+  })),
 );
