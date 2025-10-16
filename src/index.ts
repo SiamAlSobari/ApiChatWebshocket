@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { websocket } from "hono/bun";
+import { wsController } from "./api/controllers/WsController";
 import { authController } from "./api/controllers/AuthController";
 import { HTTPException } from 'hono/http-exception'
 
@@ -17,6 +18,7 @@ app.onError((err, c) => {
 })
 //kumpulan route
 app.get("/ping", (c) => c.text("pong"));
+app.route("/ws", wsController);
 app.route("/auth", authController)
 
 // penting: export server config
