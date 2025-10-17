@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { websocket } from "hono/bun";
-import { wsController } from "./api/controllers/WsController";
+import { wsController } from "./api/webocket/WsController";
 import { authController } from "./api/controllers/AuthController";
 import { HTTPException } from 'hono/http-exception'
 

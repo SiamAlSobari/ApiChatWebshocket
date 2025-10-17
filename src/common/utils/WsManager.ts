@@ -1,19 +1,15 @@
 export class WsManager {
-  public static clients = new Set<WebSocket>();
+  static clients = new Map<string, WebSocket>(); // simpan per userId
 
-  static addClient(ws: WebSocket) {
-    this.clients.add(ws);
+  static addClient(userId: string, ws: WebSocket) {
+    this.clients.set(userId, ws);
   }
 
-  static removeClient(ws: WebSocket) {
-    this.clients.delete(ws);
+  static removeClient(userId: string) {
+    this.clients.delete(userId);
   }
 
-  static boardcast(message: string) {
-    for (const client of Array.from(this.clients)) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(message);
-      }
-    }
+  static getClient(userId: string) {
+    return this.clients.get(userId);
   }
 }

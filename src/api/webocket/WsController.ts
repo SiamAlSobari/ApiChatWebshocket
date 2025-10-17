@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { upgradeWebSocket } from "hono/bun";
+import { wsHandler } from "./WsService";
 
 export const wsController = new Hono();
 
