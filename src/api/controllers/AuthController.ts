@@ -4,6 +4,7 @@ import { UserRepository } from "../repositories/UserRepository";
 import { zValidator } from "@hono/zod-validator";
 import { logInValidation } from "../validations/AuthValidation";
 import { setCookie } from "hono/cookie";
+import { authMiddleware } from "../../common/middlewares/AuthMiddleware";
 
 //instansi class
 const userRepo = new UserRepository();
@@ -23,3 +24,8 @@ authController.post("/login", zValidator("json", logInValidation), async (c) => 
   });
   return c.json({ token });
 });
+
+authController.get("/session",authMiddleware, async (c) => {
+  const user = c.get("user");
+  return c.json(user);
+})
