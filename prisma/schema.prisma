@@ -19,6 +19,8 @@ model User {
   hash_password String
 
   profile Profile?
+  chats ChatUser[]
+  messages Message[]
 }
 
 model Profile {
@@ -26,18 +28,45 @@ model Profile {
   user_id String @unique
   first_name String
   last_name String
+  avatar_url String @default("https://hwchamber.co.uk/wp-content/uploads/2022/04/avatar-placeholder.gif")
 
   user User @relation(fields: [user_id], references: [id])
 }
 
-model Group {
-  id String @id @default(uuid())
+enum CHAT_TYPE {
+  GROUP
+  ONE_TO_ONE
 }
 
-model GroupUser {
+model Chat {
   id String @id @default(uuid())
+  type CHAT_TYPE
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  users ChatUser[]
+  messages Message[]
+}
+
+model ChatUser {
+  id String @id @default(uuid())
+  chat_id String
+  user_id String
+
+  chat Chat @relation(fields: [chat_id], references: [id])
+  user User @relation(fields: [user_id], references: [id])
+
+  @@unique([chat_id, user_id])
 }
 
 model Message {
   id String @id @default(uuid())
+  chat_id String
+  sender_id String
+  from String
+  text String
+  created_at DateTime @default(now())
+
+  chat Chat @relation(fields: [chat_id], references: [id])
+  user User @relation(fields: [sender_id], references: [id])
 }
