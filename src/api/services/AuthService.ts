@@ -4,13 +4,24 @@ import { sign } from "hono/jwt";
 import { JWT_SECRET } from "../../common/constants/JwtSecret";
 import { HTTPException } from 'hono/http-exception'
 
+/**
+ * Class untuk service auth
+ */
 export class AuthService {
     constructor(
         private readonly userRepo : UserRepository
     ){} 
 
 
-    //fungsi login dan logic
+    /**
+     * Fungsi untuk login 
+     * 
+     * @param userName  -- username yang diinput
+     * @param password  -- password yang diinput
+     * @returns {Promise<string>} -- token dari jwt
+     * @throws {HTTPException} -- throw exception jika user tidak ditemukan
+     * @throws {HTTPException} -- throw exception jika password salah
+     */
     public async login(userName: string, password: string) {
         const existingUser = await this.userRepo.getUserByUserName(userName);
         if (!existingUser){ //cek user jika tidak ada

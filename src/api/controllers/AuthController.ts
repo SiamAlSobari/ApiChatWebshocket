@@ -12,7 +12,7 @@ const authService = new AuthService(userRepo);
 
 export const authController = new Hono();
 
-//handle login
+
 authController.post("/login", zValidator("json", logInValidation), async (c) => {
   const payload = c.req.valid("json");
   const token = await authService.login(payload.user_name, payload.password);
