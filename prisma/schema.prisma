@@ -63,8 +63,7 @@ model Message {
   id String @id @default(uuid())
   chat_id String
   sender_id String
-  from String
-  text String
+  content String
   created_at DateTime @default(now())
 
   chat Chat @relation(fields: [chat_id], references: [id])
