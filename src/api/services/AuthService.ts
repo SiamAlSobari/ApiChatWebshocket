@@ -16,11 +16,11 @@ export class AuthService {
     /**
      * Fungsi untuk login 
      * 
-     * @param userName  -- username yang diinput
-     * @param password  -- password yang diinput
-     * @returns {Promise<string>} -- token dari jwt
-     * @throws {HTTPException} -- throw exception jika user tidak ditemukan
-     * @throws {HTTPException} -- throw exception jika password salah
+     * @param userName  - username yang diinput
+     * @param password  - password yang diinput
+     * @returns {Promise<string>} - token dari jwt
+     * @throws {HTTPException} - throw exception jika user tidak ditemukan
+     * @throws {HTTPException} - throw exception jika password salah
      */
     public async login(userName: string, password: string) {
         const existingUser = await this.userRepo.getUserByUserName(userName);

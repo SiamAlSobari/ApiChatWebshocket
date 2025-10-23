@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,23 +11,38 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
-  user_name String @unique
-  hash_password String
+  id             String     @id @default(uuid())
+  user_name      String     @unique
+  hash_password  String
 
-  profile Profile?
-  chats ChatUser[]
-  messages Message[]
+  profile        Profile?
+  chats          ChatUser[]
+  messages       Message[]
+  created_chats  Chat[]     @relation("ChatCreator") //  user sebagai pembuat grup
+  contacts       Contact[]  @relation("UserContacts")
+  contact_of     Contact[]  @relation("ContactOfUsers")
+}
+
+model Contact {
+  id          String @id @default(uuid())
+  contact_name String?
+  user_id     String
+  contact_id  String
+
+  user        User   @relation("UserContacts", fields: [user_id], references: [id])
+  contact     User   @relation("ContactOfUsers", fields: [contact_id], references: [id])
+
+  @@unique([user_id, contact_id])
 }
 
 model Profile {
-  id String @id @default(uuid())
-  user_id String @unique
-  first_name String
-  last_name String
-  avatar_url String @default("https://hwchamber.co.uk/wp-content/uploads/2022/04/avatar-placeholder.gif")
+  id          String @id @default(uuid())
+  user_id     String @unique
+  first_name  String
+  last_name   String
+  avatar_url  String @default("https://hwchamber.co.uk/wp-content/uploads/2022/04/avatar-placeholder.gif")
 
-  user User @relation(fields: [user_id], references: [id])
+  user        User   @relation(fields: [user_id], references: [id])
 }
 
 enum CHAT_TYPE {
@@ -39,33 +51,37 @@ enum CHAT_TYPE {
 }
 
 model Chat {
-  id String @id @default(uuid())
-  type CHAT_TYPE
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
+  id          String      @id @default(uuid())
+  type        CHAT_TYPE
+  name        String?     // 🔥 Nama grup (bisa null kalau ONE_TO_ONE)
+  creator_id  String?     // 🔥 ID pembuat grup
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @default(now())
 
-  users ChatUser[]
-  messages Message[]
+  // Relasi
+  users       ChatUser[]
+  messages    Message[]
+  creator     User?       @relation("ChatCreator", fields: [creator_id], references: [id])
 }
 
 model ChatUser {
-  id String @id @default(uuid())
-  chat_id String
-  user_id String
+  id        String @id @default(uuid())
+  chat_id   String
+  user_id   String
 
-  chat Chat @relation(fields: [chat_id], references: [id])
-  user User @relation(fields: [user_id], references: [id])
+  chat      Chat   @relation(fields: [chat_id], references: [id])
+  user      User   @relation(fields: [user_id], references: [id])
 
   @@unique([chat_id, user_id])
 }
 
 model Message {
-  id String @id @default(uuid())
-  chat_id String
-  sender_id String
-  content String
-  created_at DateTime @default(now())
+  id          String   @id @default(uuid())
+  chat_id     String
+  sender_id   String
+  content     String
+  created_at  DateTime @default(now())
 
-  chat Chat @relation(fields: [chat_id], references: [id])
-  user User @relation(fields: [sender_id], references: [id])
+  chat        Chat     @relation(fields: [chat_id], references: [id])
+  user        User     @relation(fields: [sender_id], references: [id])
 }

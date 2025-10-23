@@ -12,7 +12,12 @@ const authService = new AuthService(userRepo);
 
 export const authController = new Hono();
 
-
+/**
+ * Route untuk login
+ * 
+ * @route POST /api/auth/login
+ * 
+ */
 authController.post("/login", zValidator("json", logInValidation), async (c) => {
   const payload = c.req.valid("json");
   const token = await authService.login(payload.user_name, payload.password);
@@ -25,6 +30,11 @@ authController.post("/login", zValidator("json", logInValidation), async (c) => 
   return c.json({ token });
 });
 
+/**
+ * Route untuk mengecek session
+ * 
+ * @route POST /api/auth/session
+ */
 authController.get("/session",authMiddleware, async (c) => {
   const user = c.get("user");
   return c.json(user);
