@@ -3,6 +3,8 @@ import { websocket } from "hono/bun";
 import { wsController } from "./api/webocket/WsController";
 import { authController } from "./api/controllers/AuthController";
 import { HTTPException } from 'hono/http-exception'
+import { contactController } from "./api/controllers/ContactController";
+import { chatController } from "./api/controllers/ChatController";
 
 
 const app = new Hono().basePath("/api");
@@ -20,6 +22,8 @@ app.onError((err, c) => {
 app.get("/ping", (c) => c.text("pong"));
 app.route("/ws", wsController);
 app.route("/auth", authController)
+app.route("/contacts", contactController);
+app.route("/chats", chatController);
 
 // penting: export server config
 export default {
