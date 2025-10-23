@@ -17,6 +17,7 @@ export class ChatRepository {
         })
     }
 
+    
     public async createChat(creatorId: string, type: "ONE_TO_ONE" | "GROUP", participantId: string[], groupName?: string){
         return db.chat.create({
             data: {
