@@ -8,7 +8,7 @@ import { getCookie } from "hono/cookie";
 
 declare module "hono" {
     interface ContextVariableMap {
-        user: { id: string; user_name: string };
+        user: { user_id: string; user_name: string };
     }
 }
 
@@ -33,6 +33,6 @@ export const authMiddleware: MiddlewareHandler = async (c, next) => {
 	const payload = await verify(token, JWT_SECRET);
 	if (!payload) throw new HTTPException(401, { message: "token invalid" });
 
-	c.set("user", payload as { id: string; user_name: string });
+	c.set("user", payload as { user_id: string, user_name: string });
 	return next();
 };
