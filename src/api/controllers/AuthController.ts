@@ -27,7 +27,11 @@ authController.post("/login", zValidator("json", logInValidation), async (c) => 
     path: "/",
     httpOnly: true
   });
-  return c.json({ token });
+  return c.json({ 
+    success: true,
+    message: "login successful",
+    token: token
+   }, 200);
 });
 
 /**
