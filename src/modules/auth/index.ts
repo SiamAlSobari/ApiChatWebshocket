@@ -22,7 +22,7 @@ export const Auth = new Elysia({ prefix: "/auth" })
     // Protected route example
     .group("",(app) => 
         app.use(authMiddleware)
-        .get("/profile", ({ user }) => {
+        .get("/session", ({ user }) => {
             return { user };
         })
     )
