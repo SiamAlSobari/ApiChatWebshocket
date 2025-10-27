@@ -11,13 +11,11 @@ export const authMiddleware = (app: Elysia) =>
     }))
     .derive(async ({ cookie, jwt }) => {
         const token = cookie?.token?.value;
-        console.log("token jwt cookie" + token)
         if (!token) {
             throw new Exception("Unauthorized", 401);
         }
         try {
             const payload = await jwt.verify(token as string);
-            console.log("payload jwt middleware sedang di uji", payload)
             if (!payload) {
                 throw new Exception("Unauthorized", 401);
             }
