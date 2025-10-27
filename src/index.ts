@@ -1,6 +1,8 @@
 import { Elysia, t } from "elysia";
-import { Auth } from "./modules/auth";
 import openapi from "@elysiajs/openapi";
+import cors from "@elysiajs/cors";
+import { authController } from "./modules/auth";
+import { chatController } from "./modules/chat";
 
 const clients: any[] = []; // Simpan semua koneksi aktif
 const app = new Elysia()
@@ -13,6 +15,11 @@ const app = new Elysia()
       }
     }
   }))
+  .use(cors({
+    credentials: true,
+    origin: ["http://localhost:5173","http://localhost:4173"],
+    methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+    }))
   .get("/", () => "Hello Elysia")
   //   .ws("/chat", {
   //   open(ws) {
@@ -40,10 +47,11 @@ const app = new Elysia()
   //   },
   // })
   .group("/api", (app) =>
-    app.use(Auth)
+    app.use(authController)
+    .use(chatController)
   )
   .listen(3000);
 
 console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
+  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`
 );

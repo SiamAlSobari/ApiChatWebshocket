@@ -10,7 +10,7 @@ import { SECRET_KEY } from "../../utils/constant/secret";
 
 const authRepo = new AuthRepository();
 const authService = new AuthService(authRepo);
-export const Auth = new Elysia({ prefix: "/auth" })
+export const authController = new Elysia({ prefix: "/auth" })
     .use(jwt({
         secret: SECRET_KEY,
         name: "jwt"
@@ -35,10 +35,11 @@ export const Auth = new Elysia({ prefix: "/auth" })
         body: AuthModel.loginUser,
         response: ApiResponseModel
     })
-    // Protected route example
     .group("",(app) => 
         app.use(authMiddleware)
         .get("/session", ({ user }) => {
             return new ApiResponse({ user }, `User logged in successfully`, 200);
+        },{
+            response: ApiResponseModel
         })
     )

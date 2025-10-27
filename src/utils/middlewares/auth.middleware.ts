@@ -4,6 +4,7 @@ import { Exception } from "../response/exception";
 import jwt from "@elysiajs/jwt";
 import { SECRET_KEY } from "../constant/secret";
 
+
 export const authMiddleware = (app: Elysia) =>
     app.use(jwt({
         secret: SECRET_KEY,
