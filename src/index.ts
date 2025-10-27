@@ -1,8 +1,18 @@
 import { Elysia, t } from "elysia";
 import { Auth } from "./modules/auth";
+import openapi from "@elysiajs/openapi";
 
 const clients: any[] = []; // Simpan semua koneksi aktif
 const app = new Elysia()
+  .use(openapi({
+    path: "/docs",
+    documentation:{
+      info: {
+        title: "Chat API",
+        version: "1.0.0"
+      }
+    }
+  }))
   .get("/", () => "Hello Elysia")
   //   .ws("/chat", {
   //   open(ws) {
@@ -32,7 +42,6 @@ const app = new Elysia()
   .group("/api", (app) =>
     app.use(Auth)
   )
-  .use(Auth)
   .listen(3000);
 
 console.log(
