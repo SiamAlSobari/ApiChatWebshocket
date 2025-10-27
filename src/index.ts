@@ -3,6 +3,7 @@ import openapi from "@elysiajs/openapi";
 import cors from "@elysiajs/cors";
 import { authController } from "./modules/auth";
 import { chatController } from "./modules/chat";
+import { contactController } from "./modules/contact";
 
 const clients: any[] = []; // Simpan semua koneksi aktif
 const app = new Elysia()
@@ -49,6 +50,7 @@ const app = new Elysia()
   .group("/api", (app) =>
     app.use(authController)
     .use(chatController)
+    .use(contactController)
   )
   .listen(3000);
 

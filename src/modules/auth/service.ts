@@ -10,7 +10,6 @@ export class AuthService {
 
     public async loginUser(email: string, password: string) {
         const user = await this.authRepo.getUserByEmail(email);
-        console.log(user)
         if (!user) {
             throw new Exception("User tidak ditemukan", 404);
         }
