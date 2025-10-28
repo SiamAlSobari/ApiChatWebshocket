@@ -8,4 +8,8 @@ export class ContactSevice {
     public async createContact(contactName: string, contactId:string, userId: string) {
         return await this.contactRepo.createContact(contactName, contactId, userId);
     }
+
+    public async getContact(userId: string) {
+        return await this.contactRepo.getContact(userId);
+    }
 }

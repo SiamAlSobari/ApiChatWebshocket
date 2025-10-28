@@ -41,6 +41,18 @@ async function main() {
         },
     });
     console.log({ user1, user2, user3 });
+
+    const contact1 = await db.contact.upsert({
+        where: {id:"contact-1"},
+        update: {},
+        create: {
+            contact_name: "Siam Al",
+            contact_id: user2.id,
+            user_id: user1.id
+        },
+    })
+
+    console.log({ contact1 });
 }
 
 main().then(async () => {

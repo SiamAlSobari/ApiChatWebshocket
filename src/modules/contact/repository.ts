@@ -10,4 +10,12 @@ export class ContactRepository {
             }
         })
     }
+
+    public async getContact(userId: string) {
+        return await db.contact.findMany({
+            where: {
+                user_id: userId
+            }
+        })
+    }
 }
