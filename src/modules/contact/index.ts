@@ -12,14 +12,14 @@ export const contactController = new Elysia({ prefix: "/contact" })
     .use(authMiddleware)
     .post("/", async ({ user, body }) => {
         const contact = await contactService.createContact(body.contact_name, body.contact_id, user.id);
-        return new ApiResponse(contact, `Data contact berhasil di tambahkan`, 200);
+        return new ApiResponse(contact, `Data contact berhasil di tambahkan`, Status.SUCCESS);
     },{
         body: ContactModel.createContact,
         response: ApiResponseModel
     })
     .get("/", async ({ user }) => {
         const contact = await contactService.getContact(user.id);
-        return new ApiResponse( contact, `Data contact berhasil diambil`, 200);
+        return new ApiResponse( contact, `Data contact berhasil diambil`, Status.SUCCESS);
     },{
         response: ApiResponseModel
     })

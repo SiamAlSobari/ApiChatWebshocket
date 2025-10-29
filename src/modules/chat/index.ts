@@ -11,11 +11,11 @@ const chatService = new ChatService(chatRepo);
 export const chatController = new Elysia({ prefix: "/chat" })
     .use(authMiddleware)
     .get("/", ({ user }) => {
-        return new ApiResponse({ user }, `User logged in successfully`, 200);
+        return new ApiResponse({ user }, `User logged in successfully`, Status.SUCCESS);
     })
-    .post("/room", async ({ user, body }) => {
+    .post("/private/room", async ({ user, body }) => {
         const chatRoom = await chatService.createPrivateChatRoom(user.id, body.userIdReceiver);
-        return new ApiResponse({ chatRoom }, `Chat room created successfully`, 200);
+        return new ApiResponse({ chatRoom }, `Chat room created successfully`, Status.SUCCESS);
     },{
         body: ChatModel.createChatRoom,
         response: ApiResponseModel

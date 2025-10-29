@@ -30,7 +30,7 @@ export const authController = new Elysia({ prefix: "/auth" })
             path: "/",
             httpOnly: true
         });
-        return new ApiResponse({ token: jwtToken }, `User logged in successfully`, 200);
+        return new ApiResponse({ token: jwtToken }, `User logged in successfully`, Status.SUCCESS);
     },{
         body: AuthModel.loginUser,
         response: ApiResponseModel
@@ -38,7 +38,7 @@ export const authController = new Elysia({ prefix: "/auth" })
     .group("",(app) => 
         app.use(authMiddleware)
         .get("/session", ({ user }) => {
-            return new ApiResponse({ user }, `User logged in successfully`, 200);
+            return new ApiResponse({ user }, `User logged in successfully`, Status.SUCCESS);
         },{
             response: ApiResponseModel
         })

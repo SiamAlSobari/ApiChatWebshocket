@@ -12,12 +12,13 @@ export class ChatRepository {
         });
     }
 
+
     public async getPrivateChatRoom(userId: string, userIdReceiver: string) {
         return await db.chatRoom.findFirst({
             where: {
                 type: "PRIVATE",
                 members: {
-                    every: {
+                    some: {
                         OR: [{ user_id: userId }, { user_id: userIdReceiver }],
                     },
                 },
