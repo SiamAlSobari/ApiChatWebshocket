@@ -1,4 +1,4 @@
-enum Status  {
+export enum HttpStatus  {
     SUCCESS = 200,
     CREATED = 201,
     BAD_REQUEST = 400,

@@ -65,6 +65,9 @@ model ChatRoom {
 
   messages Message[]
   members  ChatRoomMember[]
+  groups   Group[]
+  @@index([type])
+
 }
 
 model ChatRoomMember {
@@ -81,9 +84,13 @@ model ChatRoomMember {
   @@index([user_id])
 }
 
-model Grup {
+model Group {
   id  String  @id @default(uuid())
-  name String
+  group_name String
+  group_avatar String @default("https://img.freepik.com/free-vector/user-group-black-blue_78370-4716.jpg?semt=ais_hybrid&w=740&q=80")
+  chat_room_id String
+
+  chatRoom ChatRoom @relation(fields: [chat_room_id], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

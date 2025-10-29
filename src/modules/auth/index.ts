@@ -7,6 +7,7 @@ import { AuthRepository } from "./repository";
 import { AuthService } from "./service";
 import jwt from "@elysiajs/jwt";
 import { SECRET_KEY } from "../../utils/constant/secret";
+import { HttpStatus } from "../../utils/response/statusCode";
 
 const authRepo = new AuthRepository();
 const authService = new AuthService(authRepo);
@@ -30,7 +31,7 @@ export const authController = new Elysia({ prefix: "/auth" })
             path: "/",
             httpOnly: true
         });
-        return new ApiResponse({ token: jwtToken }, `User logged in successfully`, Status.SUCCESS);
+        return new ApiResponse({ token: jwtToken }, `User logged in successfully`, HttpStatus.SUCCESS);
     },{
         body: AuthModel.loginUser,
         response: ApiResponseModel
@@ -38,7 +39,7 @@ export const authController = new Elysia({ prefix: "/auth" })
     .group("",(app) => 
         app.use(authMiddleware)
         .get("/session", ({ user }) => {
-            return new ApiResponse({ user }, `User logged in successfully`, Status.SUCCESS);
+            return new ApiResponse({ user }, `User logged in successfully`, HttpStatus.SUCCESS);
         },{
             response: ApiResponseModel
         })
