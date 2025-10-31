@@ -1,48 +1,60 @@
 import Elysia, { t } from "elysia";
 import { SECRET_KEY } from "../../utils/constant/secret";
 import jwt from "@elysiajs/jwt";
+import { ChatRepository } from "../chat/repository";
+import { ChatService } from "../chat/service";
 
+const chatRepo = new ChatRepository();
+const chatService = new ChatService(chatRepo);
 export const webshocketController = new Elysia({ prefix: "/ws" })
-    .use(
-        jwt({
-            secret: SECRET_KEY,
-            name: "jwt",
-        })
-    )
     .ws("/connect", {
         query: t.Object({
             userId: t.String(),
         }),
-        // ❌ Jangan pakai body di sini biar fleksibel
-        open(ws) {
+        async open(ws) {
             const { userId } = ws.data.query;
-            console.log("✅ Client connected:", userId);
+            console.log(`✅ Client connected: ${userId}`);
+            const roomIds = await chatService.getChatRoom(userId);
+            for (const room of roomIds) {
+                ws.subscribe(room.id);
+            }
+            console.log(roomIds);
+            ws.send(JSON.stringify({ type: "connected", roomIds, userId }));
         },
-        message(ws, raw) {
+        async message(ws, raw) {
             try {
                 const { userId } = ws.data.query;
 
-                // Deteksi otomatis apakah raw sudah object atau masih string
                 const data = typeof raw === "string" ? JSON.parse(raw) : raw;
+                const { text, roomId, chatType, type } = data;
 
-                console.log(`📩 Pesan dari ${userId}:`, data);
-
-                // kirim balik ke pengirim (echo)
-                ws.send(
-                    JSON.stringify({
-                        from: userId,
-                        message: data.text,
-                        roomId: data.roomId,
-                        type: data.type,
-                    })
+                console.log(
+                    `📩 Message from ${userId}: ke roomId ${roomId}: dengan message ${text}`
                 );
+
+                const message = await chatService.createMessage(roomId, text, userId);
+
+                const outgoingMessage = JSON.stringify({
+                    type: "message",
+                    text: message.text,
+                    id: message.id,
+                    senderId: message.sender_id,
+                    roomId: message.chat_room_id,
+                    createdAt: message.createdAt,
+                });
+
+                ws.publish(roomId, outgoingMessage);
             } catch (err) {
                 console.error("❌ Error parsing message:", err);
             }
         },
 
-        close(ws) {
+        async close(ws) {
             const { userId } = ws.data.query;
+            const roomIds = await chatService.getChatRoom(userId);
+            for (const room of roomIds) {
+                ws.unsubscribe(room.id);
+            }
             console.log(`❌ Client disconnected: ${userId}`);
         },
     });

@@ -67,7 +67,6 @@ model ChatRoom {
   members  ChatRoomMember[]
   groups   Group[]
   @@index([type])
-
 }
 
 model ChatRoomMember {
@@ -100,7 +99,7 @@ model Message {
   id  String  @id @default(uuid())
   chat_room_id String
   sender_id String
-  content String
+  text  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

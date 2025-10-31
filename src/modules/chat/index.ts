@@ -21,3 +21,7 @@ export const chatController = new Elysia({ prefix: "/chat" })
         body: ChatModel.createChatRoom,
         response: ApiResponseModel
     })
+    .get("/room", async ({ user }) => {
+        const chatRoom = await chatService.getChatRoom(user.id);
+        return new ApiResponse({ chatRoom }, `Chat room created successfully`, HttpStatus.SUCCESS);
+    })

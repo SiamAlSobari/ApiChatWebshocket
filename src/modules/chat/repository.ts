@@ -25,4 +25,31 @@ export class ChatRepository {
             },
         });
     }
+
+
+    public async getChatRoom(userId: string) {
+        return await db.chatRoom.findMany({
+            where: {
+                members: {
+                    some: {
+                        user_id: userId,
+                    },
+                },
+            },
+            select: {
+                id: true,
+                type: true
+            }
+        });
+    }
+
+    public async createMessage(chatRoomId: string, text: string, senderId: string) {
+        return await db.message.create({
+            data: {
+                text: text,
+                chat_room_id: chatRoomId,
+                sender_id: senderId,
+            },
+        });
+    }
 }

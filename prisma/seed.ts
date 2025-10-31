@@ -52,6 +52,18 @@ async function main() {
         },
     })
 
+
+    const chatRoom1 = await db.chatRoom.upsert({
+        where: {id:"room-1"},
+        update: {},
+        create: {
+            type: "PRIVATE",
+            members: {
+                create: [{ user_id: user1.id }, { user_id: user2.id }],
+            },
+        },
+    })
+    console.log({ chatRoom1 });
     console.log({ contact1 });
 }
 
