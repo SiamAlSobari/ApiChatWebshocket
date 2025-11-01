@@ -23,6 +23,14 @@ export class ContactRepository {
                         profile: true,
                     },
                 },
+                contact: {
+                    select: {
+                        id: true,
+                        profile: true,
+                        chatRooms: true
+                    },
+                    
+                }, 
             },
         });
     }

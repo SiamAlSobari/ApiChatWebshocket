@@ -4,7 +4,7 @@ import cors from "@elysiajs/cors";
 import { authController } from "./modules/auth";
 import { chatController } from "./modules/chat";
 import { contactController } from "./modules/contact";
-import { webshocketController } from "./modules/webshocket";
+import { webshocketHandler } from "./modules/webshocket/handler";
 
 const clients: any[] = []; // Simpan semua koneksi aktif
 const app = new Elysia()
@@ -52,7 +52,7 @@ const app = new Elysia()
     app.use(authController)
     .use(chatController)
     .use(contactController)
-    .use(webshocketController)
+    .use(webshocketHandler)
   )
   .listen(3000);
 

@@ -52,4 +52,12 @@ export class ChatRepository {
             },
         });
     }
+
+    public async getMessages(chatRoomId: string) {
+        return await db.message.findMany({
+            where: {
+                chat_room_id: chatRoomId,
+            },
+        });
+    }
 }

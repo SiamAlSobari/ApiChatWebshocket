@@ -20,4 +20,8 @@ export class ChatService {
     public async createMessage(chatRoomId: string, text: string, senderId: string) {
         return await this.chatRepo.createMessage(chatRoomId, text,senderId);
     }
+
+    public async getMessages(chatRoomId: string) {
+        return await this.chatRepo.getMessages(chatRoomId);
+    }
 }

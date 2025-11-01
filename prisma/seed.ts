@@ -35,7 +35,7 @@ async function main() {
             hashed_password: await hash("siam123", 10),
             profile: {
                 create: {
-                    full_name: "Siam Al",
+                    full_name: "Siam 2",
                 },
             },
         },
@@ -46,8 +46,18 @@ async function main() {
         where: {id:"contact-1"},
         update: {},
         create: {
-            contact_name: "Siam Al",
+            contact_name: "Siam2",
             contact_id: user2.id,
+            user_id: user1.id
+        },
+    })
+
+    const contact2 = await db.contact.upsert({
+        where: {id:"contact-2"},
+        update: {},
+        create: {
+            contact_name: "Siam3",
+            contact_id: user3.id,
             user_id: user1.id
         },
     })
@@ -60,6 +70,17 @@ async function main() {
             type: "PRIVATE",
             members: {
                 create: [{ user_id: user1.id }, { user_id: user2.id }],
+            },
+        },
+    })
+
+    const chatRoom2 = await db.chatRoom.upsert({
+        where: {id:"room-2"},
+        update: {},
+        create: {
+            type: "PRIVATE",
+            members: {
+                create: [{ user_id: user1.id }, { user_id: user3.id }],
             },
         },
     })

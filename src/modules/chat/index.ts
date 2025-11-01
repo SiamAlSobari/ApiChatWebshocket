@@ -16,12 +16,19 @@ export const chatController = new Elysia({ prefix: "/chat" })
     })
     .post("/private/room", async ({ user, body }) => {
         const chatRoom = await chatService.createPrivateChatRoom(user.id, body.userIdReceiver);
-        return new ApiResponse({ chatRoom }, `Chat room created successfully`, HttpStatus.CREATED);
+        return new ApiResponse( chatRoom , `Chat room berhasil di buat`, HttpStatus.CREATED);
     },{
         body: ChatModel.createChatRoom,
         response: ApiResponseModel
     })
     .get("/room", async ({ user }) => {
         const chatRoom = await chatService.getChatRoom(user.id);
-        return new ApiResponse({ chatRoom }, `Chat room created successfully`, HttpStatus.SUCCESS);
+        return new ApiResponse( chatRoom , `Chat room berhasil diambil`, HttpStatus.SUCCESS);
+    })
+    .get("/message/:chatRoomId", async ({ params }) => {
+        const chatRoom = await chatService.getMessages(params.chatRoomId);
+        return new ApiResponse( chatRoom , `Message berhasil diambil`, HttpStatus.SUCCESS);
+    },{
+        params: ChatModel.getMessages,
+        response: ApiResponseModel
     })

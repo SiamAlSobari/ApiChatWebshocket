@@ -6,7 +6,7 @@ import { ChatService } from "../chat/service";
 
 const chatRepo = new ChatRepository();
 const chatService = new ChatService(chatRepo);
-export const webshocketController = new Elysia({ prefix: "/ws" })
+export const webshocketHandler = new Elysia({ prefix: "/ws" })
     .ws("/connect", {
         query: t.Object({
             userId: t.String(),
@@ -26,13 +26,14 @@ export const webshocketController = new Elysia({ prefix: "/ws" })
                 const { userId } = ws.data.query;
 
                 const data = typeof raw === "string" ? JSON.parse(raw) : raw;
-                const { text, roomId, chatType, type } = data;
+                const { text, roomId, type } = data;
 
                 console.log(
                     `📩 Message from ${userId}: ke roomId ${roomId}: dengan message ${text}`
                 );
 
                 const message = await chatService.createMessage(roomId, text, userId);
+                console.log(`✅ Message created: ${message}`);
 
                 const outgoingMessage = JSON.stringify({
                     type: "message",
@@ -42,7 +43,6 @@ export const webshocketController = new Elysia({ prefix: "/ws" })
                     roomId: message.chat_room_id,
                     createdAt: message.createdAt,
                 });
-
                 ws.publish(roomId, outgoingMessage);
             } catch (err) {
                 console.error("❌ Error parsing message:", err);
