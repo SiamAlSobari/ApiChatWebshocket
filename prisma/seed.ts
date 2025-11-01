@@ -9,7 +9,7 @@ async function main() {
             hashed_password: await hash("siam123", 10),
             profile: {
                 create: {
-                    full_name: "Siam Al",
+                    full_name: "Siam Sepat",
                 },
             },
         },
@@ -22,7 +22,7 @@ async function main() {
             hashed_password: await hash("siam123", 10),
             profile: {
                 create: {
-                    full_name: "Siam Al",
+                    full_name: "Siam Gacor",
                 },
             },
         },
@@ -35,35 +35,53 @@ async function main() {
             hashed_password: await hash("siam123", 10),
             profile: {
                 create: {
-                    full_name: "Siam 2",
+                    full_name: "Siam FF",
                 },
             },
         },
     });
     console.log({ user1, user2, user3 });
 
-    const contact1 = await db.contact.upsert({
+    const contact1ToUser2 = await db.contact.upsert({
         where: {id:"contact-1"},
         update: {},
         create: {
-            contact_name: "Siam2",
+            contact_name: "Siam Gacor",
             contact_id: user2.id,
             user_id: user1.id
         },
     })
 
-    const contact2 = await db.contact.upsert({
+    const contact2ToUser1 = await db.contact.upsert({
         where: {id:"contact-2"},
         update: {},
         create: {
-            contact_name: "Siam3",
+            contact_name: "Siam Sepat",
+            contact_id: user1.id,
+            user_id: user2.id
+        },
+    })
+
+    const contact1ToUser3 = await db.contact.upsert({
+        where: {id:"contact-3"},
+        update: {},
+        create: {
+            contact_name: "Siam FF",
             contact_id: user3.id,
             user_id: user1.id
         },
     })
 
-
-    const chatRoom1 = await db.chatRoom.upsert({
+    const contact3ToUser1 = await db.contact.upsert({
+        where: {id:"contact-4"},
+        update: {},
+        create: {
+            contact_name: "Siam Sepat",
+            contact_id: user1.id,
+            user_id: user3.id
+        },
+    })
+    const chatRoom1WithUser1AndUser2 = await db.chatRoom.upsert({
         where: {id:"room-1"},
         update: {},
         create: {
@@ -74,7 +92,7 @@ async function main() {
         },
     })
 
-    const chatRoom2 = await db.chatRoom.upsert({
+    const chatRoom2WithUser1AndUser3 = await db.chatRoom.upsert({
         where: {id:"room-2"},
         update: {},
         create: {
@@ -84,8 +102,7 @@ async function main() {
             },
         },
     })
-    console.log({ chatRoom1 });
-    console.log({ contact1 });
+    console.log({ contact1ToUser2, contact2ToUser1, contact1ToUser3, contact3ToUser1, chatRoom1WithUser1AndUser2, chatRoom2WithUser1AndUser3 });
 }
 
 main().then(async () => {

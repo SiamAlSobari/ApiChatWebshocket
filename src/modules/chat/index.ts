@@ -25,7 +25,7 @@ export const chatController = new Elysia({ prefix: "/chat" })
         const chatRoom = await chatService.getChatRoom(user.id);
         return new ApiResponse( chatRoom , `Chat room berhasil diambil`, HttpStatus.SUCCESS);
     })
-    .get("/message/:chatRoomId", async ({ params }) => {
+    .get("/messages/:chatRoomId", async ({ params }) => {
         const chatRoom = await chatService.getMessages(params.chatRoomId);
         return new ApiResponse( chatRoom , `Message berhasil diambil`, HttpStatus.SUCCESS);
     },{

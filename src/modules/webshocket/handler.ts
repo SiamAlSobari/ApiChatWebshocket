@@ -1,6 +1,4 @@
 import Elysia, { t } from "elysia";
-import { SECRET_KEY } from "../../utils/constant/secret";
-import jwt from "@elysiajs/jwt";
 import { ChatRepository } from "../chat/repository";
 import { ChatService } from "../chat/service";
 
@@ -13,7 +11,6 @@ export const webshocketHandler = new Elysia({ prefix: "/ws" })
         }),
         async open(ws) {
             const { userId } = ws.data.query;
-            console.log(`✅ Client connected: ${userId}`);
             const roomIds = await chatService.getChatRoom(userId);
             for (const room of roomIds) {
                 ws.subscribe(room.id);
@@ -28,21 +25,18 @@ export const webshocketHandler = new Elysia({ prefix: "/ws" })
                 const data = typeof raw === "string" ? JSON.parse(raw) : raw;
                 const { text, roomId, type } = data;
 
-                console.log(
-                    `📩 Message from ${userId}: ke roomId ${roomId}: dengan message ${text}`
-                );
-
                 const message = await chatService.createMessage(roomId, text, userId);
-                console.log(`✅ Message created: ${message}`);
+                console.log(message);
 
                 const outgoingMessage = JSON.stringify({
-                    type: "message",
+                    type: type,
                     text: message.text,
                     id: message.id,
                     senderId: message.sender_id,
                     roomId: message.chat_room_id,
                     createdAt: message.createdAt,
                 });
+                ws.send(outgoingMessage);
                 ws.publish(roomId, outgoingMessage);
             } catch (err) {
                 console.error("❌ Error parsing message:", err);
