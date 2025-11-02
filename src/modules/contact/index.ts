@@ -30,5 +30,5 @@ export const contactController = new Elysia({ prefix: "/contact" })
     },{
         response: ApiResponseModel,
         params: ContactModel.getContact
-    });
+    })
 

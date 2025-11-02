@@ -1,5 +1,23 @@
 import { db } from "../../utils/constant/db";
 
+export interface MessageStore {
+    text: string;
+    id: string;
+    type?: string;
+    sender_id: string;
+    chat_room_id: string;
+    createdAt: string;
+    statuses: MessageStatus[];
+}
+
+interface MessageStatus {
+    id: string;
+    status: "SENT" | "DELIVERED" | "READ";
+    message_id: string;
+    user_id: string;
+    createdAt: string;
+}
+
 export class ChatRepository {
     public async createPrivateChatRoom(userId: string, userIdReceiver: string) {
         return await db.chatRoom.create({
@@ -71,31 +89,97 @@ export class ChatRepository {
             orderBy: {
                 createdAt: "asc",
             },
+            include: {
+                statuses: true,
+            },
         });
     }
 
     public async updateReadMessage(chatRoomId: string, readerId: string) {
-        const messages = await db.message.findMany({
-            where: {
-                chat_room_id: chatRoomId,
-            },
-            select: {
-                id: true,
-            },
-        });
+        try {
+            console.log(
+                `📖 REAL-TIME: Marking messages as READ in room ${chatRoomId} for user ${readerId}`
+            );
 
-        return await db.messageStatus.updateMany({
+            // 1. Update status messages
+            const updateResult = await db.messageStatus.updateMany({
+                where: {
+                    message: {
+                        chat_room_id: chatRoomId,
+                    },
+                    receiver_id: readerId,
+                    status: {
+                        in: ["SENT", "DELIVERED"],
+                    },
+                },
+                data: {
+                    status: "READ",
+                },
+            });
+
+            // 2. Ambil semua messages di room untuk real-time update
+            const updatedMessages = await db.message.findMany({
+                where: {
+                    chat_room_id: chatRoomId,
+                },
+                include: {
+                    statuses: true,
+                },
+                orderBy: {
+                    createdAt: "asc",
+                },
+            });
+
+            // 3. Format untuk frontend
+            const formattedMessages: MessageStore[] = updatedMessages.map((msg) => ({
+                id: msg.id,
+                text: msg.text || "",
+                sender_id: msg.sender_id,
+                chat_room_id: msg.chat_room_id,
+                createdAt: msg.createdAt.toISOString(),
+                statuses: msg.statuses.map((status) => ({
+                    id: status.id,
+                    status: status.status as "SENT" | "DELIVERED" | "READ",
+                    message_id: status.message_id,
+                    user_id: status.receiver_id,
+                    createdAt: status.createdAt.toISOString(),
+                })),
+            }));
+
+            console.log(`✅ REAL-TIME: Updated ${updateResult.count} messages to READ`);
+
+            return {
+                count: updateResult.count,
+                updatedMessages: formattedMessages, // Kirim semua messages yang sudah di-update
+                readerId,
+                roomId: chatRoomId,
+            };
+        } catch (error) {
+            console.error("❌ Error updating read messages:", error);
+            throw error;
+        }
+    }
+    public async getAllMessages(userId: string) {
+        return await db.message.findMany({
             where: {
-                message_id: {
-                    in: messages.map((m) => m.id),
-                },
-                receiver_id: readerId,
-                status: {
-                    not: "READ",
-                },
+                OR: [
+                    {
+                        sender_id: userId, // pesan yang saya kirim
+                    },
+                    {
+                        statuses: {
+                            some: {
+                                receiver_id: userId, // pesan yang saya terima
+                            },
+                        },
+                    },
+                ],
             },
-            data: {
-                status: "READ",
+            include: {
+                statuses: true, // supaya status setiap penerima ikut terbawa
+            },
+            orderBy: {
+                createdAt: "asc", // urut dari lama ke baru
             },
         });
     }
@@ -119,11 +203,11 @@ export class ChatRepository {
                 chat_room_id: {
                     in: chatRooms.map((c) => c.id),
                 },
-                statuses:{
+                statuses: {
                     some: {
-                        status: "SENT"
-                    }
-                }
+                        status: "SENT",
+                    },
+                },
             },
             select: {
                 id: true,
@@ -136,7 +220,7 @@ export class ChatRepository {
                     in: messages.map((m) => m.id),
                 },
                 receiver_id: readerId,
-                status: 'SENT',
+                status: "SENT",
             },
             data: {
                 status: "DELIVERED",

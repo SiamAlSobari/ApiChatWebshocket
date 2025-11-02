@@ -32,3 +32,7 @@ export const chatController = new Elysia({ prefix: "/chat" })
         params: ChatModel.getMessages,
         response: ApiResponseModel
     })
+    .get("/messages",async ({user})=>{
+        const allMessages = await chatService.getAllMessages(user.id);
+        return new ApiResponse( allMessages , `Message berhasil diambil`, HttpStatus.SUCCESS);
+    })

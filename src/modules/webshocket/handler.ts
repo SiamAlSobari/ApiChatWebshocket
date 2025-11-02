@@ -12,14 +12,18 @@ export const webshocketHandler = new Elysia({ prefix: "/ws" }).ws("/connect", {
     }),
     async open(ws) {
         const { userId } = ws.data.query;
-        const roomIds = await chatService.getChatRoom(userId);
         console.log(`✅ Client connected: ${userId}`);
+
+        // Ambil semua room
+        const roomIds = await chatService.getChatRoom(userId);
         const updateDeliveredMessage = await chatService.updateDeliveredMessage(userId);
+
+        // Boardcast user online ke map
         onlineUsers.set(userId, ws);
-        // Subscribe ke semua room
         for (const room of roomIds) {
             ws.subscribe(room.id);
         }
+
         ws.send(
             JSON.stringify({
                 type: "connected",
@@ -27,21 +31,24 @@ export const webshocketHandler = new Elysia({ prefix: "/ws" }).ws("/connect", {
                 userId,
             })
         );
-        // boardcast user online
+
+        // Boardcast user online ke semua client
         for (const [_, client] of onlineUsers) {
             client.send(
                 JSON.stringify({
-                    type: "user_online",
+                    type: "user_status_online",
                     userId,
-                    usersOnline: Array.from(onlineUsers.keys()),
+                    users: Array.from(onlineUsers.keys()),
                 })
             );
         }
+        console.log("Client online:" + Array.from(onlineUsers.keys()));
 
-        // boardcast delivered message
+        // Boardcast delivered message
         if (updateDeliveredMessage.count > 0) {
-            for (const [_, client] of onlineUsers) {
-                client.send(
+            for (const room of roomIds) {
+                ws.publish(
+                    room.id,
                     JSON.stringify({
                         type: "delivered_message",
                         userId,
@@ -51,18 +58,18 @@ export const webshocketHandler = new Elysia({ prefix: "/ws" }).ws("/connect", {
             }
         }
     },
+
     async message(ws, raw) {
         try {
             const { userId } = ws.data.query;
-
             const data = typeof raw === "string" ? JSON.parse(raw) : raw;
-            const { text, roomId, type } = data;
+            const { text, roomId, type, messageId } = data;
 
             switch (type) {
                 case "message":
                     const message = await chatService.createMessage(roomId, text, userId);
                     const outgoingMessage = JSON.stringify({
-                        type: type,
+                        type: "message",
                         text: message.text,
                         id: message.id,
                         sender_id: message.sender_id,
@@ -75,9 +82,45 @@ export const webshocketHandler = new Elysia({ prefix: "/ws" }).ws("/connect", {
                     console.log("message created dari client", message);
                     break;
                 case "read_message":
-                    console.log("read message", roomId);
+                    console.log(`📖 User ${userId} reading messages in room ${roomId}`);
+
+                    try {
+                        const readMessage = await chatService.updateReadMessage(roomId, userId);
+
+                        // Broadcast ke SEMUA user di room termasuk sender
+                        const broadcastData = JSON.stringify({
+                            type: "read_message",
+                            roomId,
+                            readerId: userId,
+                            updatedCount: readMessage.count,
+                            updatedMessages: readMessage.updatedMessages,
+                            timestamp: Date.now(),
+                        });
+
+                        // Broadcast ke semua subscribers room
+                        ws.publish(roomId, broadcastData);
+
+                        // Juga kirim ke sender untuk konfirmasi
+                        ws.send(broadcastData);
+
+                        console.log(
+                            `✅ Read message broadcasted to room ${roomId}`,
+                            readMessage.count,
+                            "messages updated"
+                        );
+                    } catch (error) {
+                        console.error("❌ Error in read_message:", error);
+                        ws.send(
+                            JSON.stringify({
+                                type: "error",
+                                message: "Failed to mark messages as read",
+                            })
+                        );
+                    }
                     break;
+
                 default:
+                    console.log("Unknown message type:", type);
                     break;
             }
         } catch (err) {
@@ -89,16 +132,18 @@ export const webshocketHandler = new Elysia({ prefix: "/ws" }).ws("/connect", {
         const { userId } = ws.data.query;
         const roomIds = await chatService.getChatRoom(userId);
         onlineUsers.delete(userId);
-        //boardcast user offline
+
+        // Boardcast user offline
         for (const [_, client] of onlineUsers) {
             client.send(
                 JSON.stringify({
-                    type: "user_offline",
+                    type: "user_status_offline",
                     userId,
-                    usersOnline: Array.from(onlineUsers.keys()),
+                    users: Array.from(onlineUsers.keys()),
                 })
             );
         }
+
         for (const room of roomIds) {
             ws.unsubscribe(room.id);
         }
