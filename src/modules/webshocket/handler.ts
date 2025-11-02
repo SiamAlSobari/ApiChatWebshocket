@@ -14,6 +14,7 @@ export const webshocketHandler = new Elysia({ prefix: "/ws" }).ws("/connect", {
         const { userId } = ws.data.query;
         const roomIds = await chatService.getChatRoom(userId);
         console.log(`✅ Client connected: ${userId}`);
+        const updateDeliveredMessage = await chatService.updateDeliveredMessage(userId);
         onlineUsers.set(userId, ws);
         // Subscribe ke semua room
         for (const room of roomIds) {
@@ -36,6 +37,19 @@ export const webshocketHandler = new Elysia({ prefix: "/ws" }).ws("/connect", {
                 })
             );
         }
+
+        // boardcast delivered message
+        if (updateDeliveredMessage.count > 0) {
+            for (const [_, client] of onlineUsers) {
+                client.send(
+                    JSON.stringify({
+                        type: "delivered_message",
+                        userId,
+                        updatedCount: updateDeliveredMessage.count,
+                    })
+                );
+            }
+        }
     },
     async message(ws, raw) {
         try {
@@ -54,6 +68,7 @@ export const webshocketHandler = new Elysia({ prefix: "/ws" }).ws("/connect", {
                         sender_id: message.sender_id,
                         chat_room_id: message.chat_room_id,
                         createdAt: message.createdAt,
+                        statuses: message.statuses,
                     });
                     ws.send(outgoingMessage);
                     ws.publish(roomId, outgoingMessage);

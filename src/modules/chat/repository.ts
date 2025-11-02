@@ -57,6 +57,9 @@ export class ChatRepository {
                         .map((m) => ({ receiver_id: m.user_id })),
                 },
             },
+            include: {
+                statuses: true,
+            },
         });
     }
 
@@ -67,6 +70,76 @@ export class ChatRepository {
             },
             orderBy: {
                 createdAt: "asc",
+            },
+        });
+    }
+
+    public async updateReadMessage(chatRoomId: string, readerId: string) {
+        const messages = await db.message.findMany({
+            where: {
+                chat_room_id: chatRoomId,
+            },
+            select: {
+                id: true,
+            },
+        });
+
+        return await db.messageStatus.updateMany({
+            where: {
+                message_id: {
+                    in: messages.map((m) => m.id),
+                },
+                receiver_id: readerId,
+                status: {
+                    not: "READ",
+                },
+            },
+            data: {
+                status: "READ",
+            },
+        });
+    }
+
+    public async updateDeliveredMessage(readerId: string) {
+        const chatRooms = await db.chatRoom.findMany({
+            where: {
+                members: {
+                    some: {
+                        user_id: readerId,
+                    },
+                },
+            },
+            select: {
+                id: true,
+            },
+        });
+
+        const messages = await db.message.findMany({
+            where: {
+                chat_room_id: {
+                    in: chatRooms.map((c) => c.id),
+                },
+                statuses:{
+                    some: {
+                        status: "SENT"
+                    }
+                }
+            },
+            select: {
+                id: true,
+            },
+        });
+
+        return await db.messageStatus.updateMany({
+            where: {
+                message_id: {
+                    in: messages.map((m) => m.id),
+                },
+                receiver_id: readerId,
+                status: 'SENT',
+            },
+            data: {
+                status: "DELIVERED",
             },
         });
     }

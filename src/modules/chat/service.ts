@@ -24,4 +24,12 @@ export class ChatService {
     public async getMessages(chatRoomId: string) {
         return await this.chatRepo.getMessages(chatRoomId);
     }
+
+    public async updateReadMessage(chatRoomId: string, readerId: string) {
+        return await this.chatRepo.updateReadMessage(chatRoomId, readerId);
+    }
+
+    public async updateDeliveredMessage(readerId: string) {
+        return await this.chatRepo.updateDeliveredMessage(readerId);
+    }
 }
