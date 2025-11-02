@@ -4,51 +4,79 @@ import { ChatService } from "../chat/service";
 
 const chatRepo = new ChatRepository();
 const chatService = new ChatService(chatRepo);
-export const webshocketHandler = new Elysia({ prefix: "/ws" })
-    .ws("/connect", {
-        query: t.Object({
-            userId: t.String(),
-        }),
-        async open(ws) {
+
+const onlineUsers = new Map<string, any>();
+export const webshocketHandler = new Elysia({ prefix: "/ws" }).ws("/connect", {
+    query: t.Object({
+        userId: t.String(),
+    }),
+    async open(ws) {
+        const { userId } = ws.data.query;
+        const roomIds = await chatService.getChatRoom(userId);
+        onlineUsers.set(userId, ws);
+        // Subscribe ke semua room
+        for (const room of roomIds) {
+            ws.subscribe(room.id);
+        }
+        ws.send(
+            JSON.stringify({
+                type: "connected",
+                roomIds,
+                userId,
+            })
+        );
+        // boardcast user online
+        for (const [_, client] of onlineUsers) {
+            client.send(
+                JSON.stringify({
+                    type: "user_online",
+                    userId,
+                    usersOnline: Array.from(onlineUsers.keys()),
+                })
+            );
+        }
+    },
+    async message(ws, raw) {
+        try {
             const { userId } = ws.data.query;
-            const roomIds = await chatService.getChatRoom(userId);
-            for (const room of roomIds) {
-                ws.subscribe(room.id);
-            }
-            console.log(roomIds);
-            ws.send(JSON.stringify({ type: "connected", roomIds, userId }));
-        },
-        async message(ws, raw) {
-            try {
-                const { userId } = ws.data.query;
 
-                const data = typeof raw === "string" ? JSON.parse(raw) : raw;
-                const { text, roomId, type } = data;
+            const data = typeof raw === "string" ? JSON.parse(raw) : raw;
+            const { text, roomId, type } = data;
 
-                const message = await chatService.createMessage(roomId, text, userId);
-                console.log(message);
+            const message = await chatService.createMessage(roomId, text, userId);
 
-                const outgoingMessage = JSON.stringify({
-                    type: type,
-                    text: message.text,
-                    id: message.id,
-                    senderId: message.sender_id,
-                    roomId: message.chat_room_id,
-                    createdAt: message.createdAt,
-                });
-                ws.send(outgoingMessage);
-                ws.publish(roomId, outgoingMessage);
-            } catch (err) {
-                console.error("❌ Error parsing message:", err);
-            }
-        },
+            const outgoingMessage = JSON.stringify({
+                type: type,
+                text: message.text,
+                id: message.id,
+                sender_id: message.sender_id,
+                chat_room_id: message.chat_room_id,
+                createdAt: message.createdAt,
+            });
+            ws.send(outgoingMessage);
+            ws.publish(roomId, outgoingMessage);
+        } catch (err) {
+            console.error("❌ Error parsing message:", err);
+        }
+    },
 
-        async close(ws) {
-            const { userId } = ws.data.query;
-            const roomIds = await chatService.getChatRoom(userId);
-            for (const room of roomIds) {
-                ws.unsubscribe(room.id);
-            }
-            console.log(`❌ Client disconnected: ${userId}`);
-        },
-    });
+    async close(ws) {
+        const { userId } = ws.data.query;
+        const roomIds = await chatService.getChatRoom(userId);
+        onlineUsers.delete(userId);
+        //boardcast user offline
+        for (const [_, client] of onlineUsers) {
+            client.send(
+                JSON.stringify({
+                    type: "user_offline",
+                    userId,
+                    usersOnline: Array.from(onlineUsers.keys()),
+                })
+            );
+        }
+        for (const room of roomIds) {
+            ws.unsubscribe(room.id);
+        }
+        console.log(`❌ Client disconnected: ${userId}`);
+    },
+});

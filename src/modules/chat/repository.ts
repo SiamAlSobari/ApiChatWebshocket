@@ -58,6 +58,9 @@ export class ChatRepository {
             where: {
                 chat_room_id: chatRoomId,
             },
+            orderBy:{
+                createdAt: "asc"
+            }
         });
     }
 }
