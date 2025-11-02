@@ -25,6 +25,8 @@ model User {
   chatRooms ChatRoomMember[]
   contactsOf  Contact[] @relation("ContactUser")
   contacts   Contact[]
+  messageStatuses MessageStatus[]
+  
 } 
 
 
@@ -105,7 +107,30 @@ model Message {
 
   chatRoom ChatRoom @relation(fields: [chat_room_id], references: [id])
   sender   User     @relation("MessageSender",fields: [sender_id], references: [id])
+  statuses MessageStatus[]
 
   @@index([chat_room_id])
   @@index([sender_id])
+}
+
+
+model MessageStatus {
+  id          String   @id @default(uuid())
+  message_id  String
+  receiver_id     String
+  status      MessageReadStatus @default(SENT) // default masih dikirim
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  message Message @relation(fields: [message_id], references: [id])
+  user    User    @relation(fields: [receiver_id], references: [id])
+
+  @@index([message_id])
+  @@index([receiver_id])
+}
+
+enum MessageReadStatus {
+  SENT 
+  DELIVERED
+  READ
 }

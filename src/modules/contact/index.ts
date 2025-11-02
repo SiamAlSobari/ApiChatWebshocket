@@ -19,9 +19,16 @@ export const contactController = new Elysia({ prefix: "/contact" })
         response: ApiResponseModel
     })
     .get("/", async ({ user }) => {
-        const contact = await contactService.getContact(user.id);
+        const contact = await contactService.getContacts(user.id);
         return new ApiResponse( contact, `Data contact berhasil diambil`, HttpStatus.SUCCESS);
     },{
         response: ApiResponseModel
     })
+    .get("/:userId", async ({ params }) => {
+        const contact = await contactService.getContact(params.userId);
+        return new ApiResponse( contact, `Data contact berhasil diambil`, HttpStatus.SUCCESS);
+    },{
+        response: ApiResponseModel,
+        params: ContactModel.getContact
+    });
 

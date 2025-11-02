@@ -5,4 +5,8 @@ export const ContactModel = {
         contact_name: t.String({minLength: 3, maxLength: 500}),
         contact_id: t.String({minLength: 3, maxLength: 500}), 
     }),
+
+    getContact: t.Object({
+        userId: t.String({minLength: 3, maxLength: 500}), 
+    }),
 }

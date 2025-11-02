@@ -13,6 +13,7 @@ export const webshocketHandler = new Elysia({ prefix: "/ws" }).ws("/connect", {
     async open(ws) {
         const { userId } = ws.data.query;
         const roomIds = await chatService.getChatRoom(userId);
+        console.log(`✅ Client connected: ${userId}`);
         onlineUsers.set(userId, ws);
         // Subscribe ke semua room
         for (const room of roomIds) {
@@ -43,18 +44,27 @@ export const webshocketHandler = new Elysia({ prefix: "/ws" }).ws("/connect", {
             const data = typeof raw === "string" ? JSON.parse(raw) : raw;
             const { text, roomId, type } = data;
 
-            const message = await chatService.createMessage(roomId, text, userId);
-
-            const outgoingMessage = JSON.stringify({
-                type: type,
-                text: message.text,
-                id: message.id,
-                sender_id: message.sender_id,
-                chat_room_id: message.chat_room_id,
-                createdAt: message.createdAt,
-            });
-            ws.send(outgoingMessage);
-            ws.publish(roomId, outgoingMessage);
+            switch (type) {
+                case "message":
+                    const message = await chatService.createMessage(roomId, text, userId);
+                    const outgoingMessage = JSON.stringify({
+                        type: type,
+                        text: message.text,
+                        id: message.id,
+                        sender_id: message.sender_id,
+                        chat_room_id: message.chat_room_id,
+                        createdAt: message.createdAt,
+                    });
+                    ws.send(outgoingMessage);
+                    ws.publish(roomId, outgoingMessage);
+                    console.log("message created dari client", message);
+                    break;
+                case "read_message":
+                    console.log("read message", roomId);
+                    break;
+                default:
+                    break;
+            }
         } catch (err) {
             console.error("❌ Error parsing message:", err);
         }

@@ -9,7 +9,13 @@ export class ContactSevice {
         return await this.contactRepo.createContact(contactName, contactId, userId);
     }
 
+    public async getContacts(userId: string) {
+        return await this.contactRepo.getContacts(userId);
+    }
+
     public async getContact(userId: string) {
         return await this.contactRepo.getContact(userId);
     }
+
+
 }

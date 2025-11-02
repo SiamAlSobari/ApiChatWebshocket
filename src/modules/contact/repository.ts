@@ -11,7 +11,7 @@ export class ContactRepository {
         });
     }
 
-    public async getContact(userId: string) {
+    public async getContacts(userId: string) {
         return await db.contact.findMany({
             where: {
                 user_id: userId,
@@ -33,5 +33,21 @@ export class ContactRepository {
                 }, 
             },
         });
+    }
+
+    public async getContact(userId: string) {
+        return await db.contact.findFirst({
+            where: {
+                contact_id: userId
+            },
+            include: {
+                contact: {
+                    select: {
+                        id: true,
+                        profile: true,
+                    },
+                }, 
+            },
+        })
     }
 }
